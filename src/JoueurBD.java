@@ -15,8 +15,8 @@ public class JoueurBD {
 		st = laConnexion.createStatement(); // exécution requete
 
 		ResultSet resultSet = st.executeQuery("SELECT IFNULL(max(numJoueur),0) leMax from JOUEUR"); // chargement de la
-																								// premiere ligne du
-																								// resultat
+		// premiere ligne du
+		// resultat
 
 		resultSet.next(); // consultation de cette ligne
 
@@ -84,12 +84,18 @@ public class JoueurBD {
 		PreparedStatement ps = laConnexion.prepareStatement(
 				"SELECT * From JOUEUR WHERE numJoueur = ?");
 
+<<<<<<< HEAD
 		ps.setInt(1, num);
 		ResultSet rs = ps.executeQuery();
+=======
+		ps.setInt(1, num); // Lier le paramètre
+		ResultSet rs = ps.executeQuery(); // Exécuter une requête SELECT
+>>>>>>> 56a63916e1a17c9c963f09adc40bdb6f8bb2ea4b
 
 		Joueur joueur = null;
 
 		if (rs.next()) {
+<<<<<<< HEAD
 			int numJoueur = rs.getInt("numJoueur");        // Ajouté
 			String pseudo = rs.getString("pseudo");
 			String motdepasse = rs.getString("motdepasse");
@@ -98,11 +104,21 @@ public class JoueurBD {
 			int niveau = rs.getInt("niveau");
 
 			joueur = new Joueur(numJoueur, pseudo, motdepasse, abonne, main, niveau);  // Corrigé
+=======
+			String pseudo = rs.getString("pseudo");
+			String motdepasse = rs.getString("motdepasse");
+			String main = rs.getString("main");
+			boolean abonne = rs.getString("abonne").equals("O");
+			int niveau = rs.getInt("niveau");
+
+			joueur = new Joueur(pseudo, motdepasse, main, abonne, niveau);
+>>>>>>> 56a63916e1a17c9c963f09adc40bdb6f8bb2ea4b
 		}
 
 		rs.close();
 		ps.close();
 
+<<<<<<< HEAD
 		return joueur;
 	}
 
@@ -130,9 +146,38 @@ public class JoueurBD {
     ps.close();    
     
 	return liste;
+=======
+		return joueur; // null si non trouvé
+>>>>>>> 56a63916e1a17c9c963f09adc40bdb6f8bb2ea4b
 	}
 
+	ArrayList<Joueur> recupererTousLesJoueurs() throws SQLException {
+		ArrayList<Joueur> liste = new ArrayList<>();
+		String requete = "SELECT * FROM JOUEUR";
+	
+		try (Statement st = laConnexion.createStatement();
+			 ResultSet resultSet = st.executeQuery(requete)) {
+	
+			while (resultSet.next()) {
+				int numJoueur = resultSet.getInt("numJoueur");
+				String pseudo = resultSet.getString("pseudo");
+				String motdepasse = resultSet.getString("motdepasse");
+				String main = resultSet.getString("main");
+				boolean abonne = resultSet.getString("abonne").equals("O");
+				int niveau = resultSet.getInt("niveau");
+	
+				Joueur j = new Joueur(pseudo, motdepasse, main, abonne, niveau);
+				j.setNumJoueur(numJoueur);
+				liste.add(j);
+			}
+		}
+	
+		return liste;
+	}
+	
+
 	String rapportMessage() throws SQLException {
+<<<<<<< HEAD
 	PreparedStatement ps = laConnexion.prepareStatement(
 				"SELECT pseudo, date(dateMsg) ladate , count(*) nbmssge " +
 				"from MESSAGE,JOUEUR " +
@@ -148,23 +193,87 @@ public class JoueurBD {
 
 
 		return res;
+=======
+		StringBuilder sb = new StringBuilder();
+		st = laConnexion.createStatement();
+		ResultSet resultSet = st.executeQuery(
+				"SELECT COUNT(*) AS nbMsg, DATE_FORMAT(dateEnvoi, '%Y-%m-%d') AS date FROM MESSAGE GROUP BY dateEnvoi");
+
+		while (resultSet.next()) {
+			int nbMsg = resultSet.getInt("nbMsg");
+			String date = resultSet.getString("date");
+			sb.append("Date: ").append(date).append(", Nombre de messages: ").append(nbMsg).append("\n");
+		}
+
+		resultSet.close();
+		return sb.toString();
+>>>>>>> 56a63916e1a17c9c963f09adc40bdb6f8bb2ea4b
 	}
 
 	String rapportMessageComplet() throws SQLException {
-		return "rapportMessageComplet A faire";
+		StringBuilder sb = new StringBuilder();
+		st = laConnexion.createStatement();
+		ResultSet resultSet = st.executeQuery("SELECT * FROM MESSAGE");
+
+		while (resultSet.next()) {
+			int numMessage = resultSet.getInt("numMessage");
+			int numJoueur = resultSet.getInt("numJoueur");
+			String contenu = resultSet.getString("contenu");
+			Timestamp dateEnvoi = resultSet.getTimestamp("dateEnvoi");
+
+			sb.append("Numéro de message: ").append(numMessage)
+					.append(", Numéro de joueur: ").append(numJoueur)
+					.append(", Contenu: ").append(contenu)
+					.append(", Date d'envoi: ").append(dateEnvoi).append("\n");
+		}
+
+		resultSet.close();
+		return sb.toString();
 	}
 
 	ArrayList<Map.Entry<String, Integer>> nbMsgParJour() throws SQLException {
 		// Pour créer une valeur pouvant être ajoutée à l'ArrayList<Map.Entry<String,
 		// Integer>>
 		// faire un new AbstractMap.SimpleEntry<>("coucou",45)
-		throw new SQLException("méthode nbMsgParJour à implémenter");
+
+		ArrayList<Map.Entry<String, Integer>> liste = new ArrayList<>(); // Crée une liste vide pour stocker les paires
+																			// date/nombre de messages
+		st = laConnexion.createStatement(); // Crée un objet Statement pour exécuter la requête SQL
+		ResultSet resultSet = st.executeQuery( // Exécute la requête SQL qui :
+				"SELECT DATE_FORMAT(dateEnvoi, '%Y-%m-%d') AS date, " + // - Formate la date d'envoi au format
+																		// YYYY-MM-DD
+						"COUNT(*) AS nbMsg FROM MESSAGE GROUP BY dateEnvoi"); // - Compte le nombre de messages et
+																				// groupe par date d'envoi
+
+		while (resultSet.next()) { // Parcourt chaque ligne du résultat de la requête
+			String date = resultSet.getString("date"); // Récupère la date formatée de la colonne "date"
+			int nbMsg = resultSet.getInt("nbMsg"); // Récupère le nombre de messages de la colonne "nbMsg"
+			liste.add(new AbstractMap.SimpleEntry<>(date, nbMsg)); // Crée une paire clé-valeur (date, nombre) et
+																	// l'ajoute à la liste
+		}
+
+		resultSet.close(); // Ferme le ResultSet pour libérer les ressources mémoire
+		return liste; // Retourne la liste complète des statistiques par jour
 	}
 
 	ArrayList<Map.Entry<String, Integer>> nbMain() throws SQLException {
 		// Pour créer une valeur pouvant être ajoutée à l'ArrayList<Map.Entry<String,
 		// Integer>>
 		// faire un new AbstractMap.SimpleEntry<>("coucou",45)
-		throw new SQLException("méthode nbMain à implémenter");
+
+		ArrayList<Map.Entry<String, Integer>> liste = new ArrayList<>(); // Crée la liste de résultats
+		st = laConnexion.createStatement(); // Crée l'objet Statement pour exécuter la requête
+		ResultSet resultSet = st.executeQuery( // Exécute la requête SQL qui groupe par type de main
+				"SELECT main, COUNT(*) AS nbJoueurs FROM JOUEUR GROUP BY main"); // Compte le nombre de joueurs pour
+																					// chaque type de main
+
+		while (resultSet.next()) { // Parcourt tous les résultats de la requête
+			String typeMain = resultSet.getString("main"); // Récupère le type de main (droitier/gaucher)
+			int nbJoueurs = resultSet.getInt("nbJoueurs"); // Récupère le nombre de joueurs pour ce type
+			liste.add(new AbstractMap.SimpleEntry<>(typeMain, nbJoueurs)); // Ajoute une entrée clé-valeur à la liste
+		}
+
+		resultSet.close(); // Ferme le ResultSet pour libérer les ressources
+		return liste; // Retourne la liste des types de main avec leurs effectifs
 	}
 }
