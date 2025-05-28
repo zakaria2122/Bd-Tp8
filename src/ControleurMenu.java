@@ -73,7 +73,7 @@ public class ControleurMenu implements EventHandler<ActionEvent> {
                 case "Afficher tous les joueurs":
                     String laListe="";
                     try {
-                        ArrayList<Joueur> res = this.testJDBC.getJoueurBD().listeDesJoueurs();
+                        ArrayList<Joueur> res = this.testJDBC.getJoueurBD().listeDesJoueuresultSet();
                         for (Joueur j:res){
                             laListe+=j.getIdentifiant()+" "+j.getPseudo()+"\n";
                         }

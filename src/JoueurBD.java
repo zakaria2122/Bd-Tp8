@@ -84,34 +84,70 @@ public class JoueurBD {
 		PreparedStatement ps = laConnexion.prepareStatement(
 				"SELECT * From JOUEUR WHERE numJoueur = ?");
 
-  ps.setInt(1, num);  // Lier le paramètre
-    ResultSet rs = ps.executeQuery();  // Exécuter une requête SELECT
+		ps.setInt(1, num);
+		ResultSet rs = ps.executeQuery();
 
-    Joueur joueur = null;
+		Joueur joueur = null;
 
-    if (rs.next()) {
-        String pseudo = rs.getString("pseudo");
-        String motdepasse = rs.getString("motdepasse");
-        String main = rs.getString("main");
-        boolean abonne = rs.getString("abonne").equals("O");
-        int niveau = rs.getInt("niveau");
+		if (rs.next()) {
+			int numJoueur = rs.getInt("numJoueur");        // Ajouté
+			String pseudo = rs.getString("pseudo");
+			String motdepasse = rs.getString("motdepasse");
+			char main = rs.getString("main").charAt(0);
+			boolean abonne = rs.getString("abonne").equals("O");
+			int niveau = rs.getInt("niveau");
 
-        joueur = new Joueur(numJoueur, pseudo, motdepasse, main, abonne, niveau);
-    }
+			joueur = new Joueur(numJoueur, pseudo, motdepasse, abonne, main, niveau);  // Corrigé
+		}
 
-    rs.close();
-    ps.close();
+		rs.close();
+		ps.close();
 
-    return joueur; // null si non trouvé
-}
+		return joueur;
+	}
 
 
 	ArrayList<Joueur> listeDesJoueuresultSet() throws SQLException {
-		throw new SQLException("méthode listeDesJoueuresultSet à implémenter");
+
+		ArrayList<Joueur> liste = new ArrayList<>();
+		PreparedStatement ps = laConnexion.prepareStatement(
+				"SELECT * From JOUEUR" );
+		ResultSet rs = ps.executeQuery(); 
+
+		while (rs.next()) {
+				int numJoueur = rs.getInt("numJoueur");    // Ajouté
+				String pseudo = rs.getString("pseudo");
+				String motdepasse = rs.getString("motdepasse");
+				char main = rs.getString("main").charAt(0);
+				boolean abonne = rs.getString("abonne").equals("O");
+				int niveau = rs.getInt("niveau");
+
+				Joueur j = new Joueur(numJoueur, pseudo, motdepasse, abonne, main, niveau);  
+				liste.add(j);
+	}
+	
+	rs.close();    
+    ps.close();    
+    
+	return liste;
 	}
 
 	String rapportMessage() throws SQLException {
-		return "rapportMessage A faire";
+	PreparedStatement ps = laConnexion.prepareStatement(
+				"SELECT pseudo, date(dateMsg) ladate , count(*) nbmssge " +
+				"from MESSAGE,JOUEUR " +
+				"where JOUEUR.numJoueur = idUt1 " +
+				"group by date(dateMsg),pseudo "  );
+		ResultSet rs = ps.executeQuery(); 
+		String res = "";
+		while(rs.next()){
+			res +=  rs.getString("pseudo") + rs.getDate("ladate")+ rs.getInt("nbmssge")+ "\n";
+		}
+		rs.close();
+		ps.close();
+
+
+		return res;
 	}
 
 	String rapportMessageComplet() throws SQLException {

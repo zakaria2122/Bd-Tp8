@@ -18,9 +18,6 @@ public class Joueur {
     }
 
 
-    public Joueur(String pseudo2, String motdepasse2, String main2, boolean abonne2, int niveau2) {
-        //TODO Auto-generated constructor stub
-    }
 
 
     public int getIdentifiant() {
